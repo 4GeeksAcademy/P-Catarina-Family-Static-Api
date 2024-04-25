@@ -1,3 +1,7 @@
+
+#  The error remain but I've tested all the methods in Thunder Client and they work...
+# Error "Method GET /member/<int:id> should exist" and it does
+
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
@@ -51,27 +55,29 @@ def get_all_members():
     members = jackson_family.get_all_members()
     return jsonify(members), 200
 
-@app.route('/member/<int:member_id>', methods=['GET'])
-def get_single_member(member_id):
-    member = jackson_family.get_member(member_id)
+@app.route('/member/<int:id>', methods=['GET'])
+def get_single_member(id):
+    member = jackson_family.get_member(id)
     if member is None:
-        return jsonify({"reqest": 'this member doesnt exist'}), 400
-    else:
-        return jsonify({"reqest": 'done'}), 200
+        return jsonify({"done": False}), 400
+    return jsonify(member), 200
 
 @app.route('/member', methods=['POST'])
 def add_member():
     new_member = request.get_json()
     if new_member is None:
-        return jsonify({"reqest": 'something went wrong'}), 400
+        return jsonify({"done": False}), 400
     else:
         jackson_family.add_member(new_member)
-        return jsonify({"reqest": 'done'}), 200
+        return jsonify({"done": True}), 200
     
-@app.route('/member/<int:member_id>', methods=['DELETE'])
-def delete_member(member_id):
-    jackson_family.delete_member(member_id)
-    return jsonify({"reqest": 'done'}), 200
+@app.route('/member/<int:id>', methods=['DELETE'])
+def delete_member(id):
+    jackson_family.delete_member(id)
+    member = jackson_family.get_member(id)
+    if member is None:
+        return jsonify({"done": True}), 200
+    return jsonify({"done": False}), 400
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
